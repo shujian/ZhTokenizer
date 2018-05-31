@@ -26,7 +26,7 @@ SOFTWARE.
 # usage: python tokenizeChinese.py inputFile outputFile
 # Shujian Huang huangsj@nju.edu.cn
 
-
+import argparse
 import re
 import sys
 import codecs
@@ -138,21 +138,15 @@ def tokenizeFile(inputFile, outputFile):
 
     :param outputFile: output XML file with tokenized text 
     """
-    file_r = codecs.open(inputFile, 'r', encoding="utf-8")  # input file
-    file_w = codecs.open(outputFile, 'w', encoding="utf-8")  # result file
 
-    for sentence in file_r:
+    for sentence in inputFile:
         if sentence.startswith("<seg"):
             start = sentence.find(">") + 1
             end = sentence.rfind("<")
             new_sentence = sentence[:start] + tokenizeString(sentence[start:end]) + sentence[end:]
         else:
-            new_sentence = sentence
-        file_w.write(new_sentence)
-
-    file_r.close()
-    file_w.close()
-
+            new_sentence = tokenizeString(sentence) + "\n"
+        outputFile.write(new_sentence)
 
 def tokenizePlainFile(inputFile, outputFile):
     """
@@ -160,16 +154,25 @@ def tokenizePlainFile(inputFile, outputFile):
 
     :param outputFile: output plain text file with tokenized text
     """
-    file_r = codecs.open(inputFile, 'r', encoding="utf-8")  # input file
-    file_w = codecs.open(outputFile, 'w', encoding="utf-8")  # result file
 
-    for sentence in file_r:
+    for sentence in inputFile:
         new_sentence = tokenizeString(sentence)
-        file_w.write(new_sentence + '\n')
+        outputFile.write(new_sentence + '\n')
 
-    file_r.close()
-    file_w.close()
+def createArgumentParser():
 
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-i", "--input", nargs="?", type=argparse.FileType("r", encoding="utf-8"), default=sys.stdin,
+                        help="Input file. Use standard input as default.")
+
+    parser.add_argument("-o", "--output", nargs="?", type=argparse.FileType("w", encoding="utf-8"), default=sys.stdout,
+                        help="Output file. Use standard output as default.")
+
+    return parser
 
 if __name__ == '__main__':
-    tokenizeFile(sys.argv[1], sys.argv[2])
+
+    parser = createArgumentParser()
+    args = parser.parse_args()
+    tokenizeFile(args.input, args.output)
