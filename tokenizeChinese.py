@@ -145,7 +145,7 @@ def tokenizeFile(inputFile, outputFile):
             end = sentence.rfind("<")
             new_sentence = sentence[:start] + tokenizeString(sentence[start:end]) + sentence[end:]
         else:
-            new_sentence = tokenizeString(sentence) + "\n"
+            new_sentence = sentence
         outputFile.write(new_sentence)
 
 def tokenizePlainFile(inputFile, outputFile):
@@ -169,10 +169,18 @@ def createArgumentParser():
     parser.add_argument("-o", "--output", nargs="?", type=argparse.FileType("w", encoding="utf-8"), default=sys.stdout,
                         help="Output file. Use standard output as default.")
 
+    parser.add_argument("-p", "--plain", action="store_true",
+                        help="Input file is plain text.")
+
     return parser
 
 if __name__ == '__main__':
 
     parser = createArgumentParser()
     args = parser.parse_args()
-    tokenizeFile(args.input, args.output)
+
+    if args.plain:
+        tokenizePlainFile(args.input, args.output)
+    else:
+        tokenizeFile(args.input, args.output)
+
